@@ -33,7 +33,7 @@ If output looks like `Python 3` - Congrats, Python 3 is installed properly.
 
 ## Usage:
 
-Run these commands to run TBomb
+Run these commands to run krishnabomb
 
 ### > For Termux:
 
@@ -49,7 +49,7 @@ To use the bomber type the following commands in Termux:
 pkg install git
 pkg install python
 git clone https://github.com/krishna-india/krishna.git
-cd krishnabomb
+cd krishna
 chmod +x krishnabomb.sh
 ./krishnabomb.sh
 ```
@@ -67,7 +67,7 @@ To use the bomber type the following commands in Linux terminal:
 ```
 sudo apt install git
 git clone https://github.com/krishna-india/krishna.git
-cd krishnabomb
+cd krishna
 chmod +x krishnabomb.sh
 sudo bash krishnabomb.sh
 ```
@@ -87,7 +87,7 @@ brew install python3
 sudo easy_install pip
 sudo pip install --upgrade pip
 git clone https://github.com/krishna-india/krishna.git
-cd krishnabomb
+cd krishna
 chmod +x krishnabomb.sh
 
 # Missing Tools
