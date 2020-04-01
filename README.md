@@ -101,4 +101,4 @@ sudo bash krishnabomb.sh
 
 
 # CONTACT ME:
-mail me at: krishnasingh@gmail.com
+mail me at: krishnasingh62000@gmail.com
