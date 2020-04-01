@@ -105,6 +105,6 @@ mail me at: krishnasingh@gmail.com
 
 
 ```
-                 Mail: krishnasingh62000@gmail.com<br>
+                 
      
 ``
