@@ -1,4 +1,4 @@
-<h1 align="center">krishnabomb v1.0b</h1>
+<h1 align="center">krishnabomb v1.0</h1>
 <p align="center">An open-source SMS/call bomber for Linux And Termux.</p><br>
 
 ## Note:
@@ -6,8 +6,8 @@
 - The script requires working network connection to work.
 - No balance will be deducted for using this script to send SMS/calls.
 - While doing infinite bombing use 2-3 seconds delay and 10 to 20 threads for maximum performance.
-- Don't put spaces in between phone number (Ex- 99999 99999)
-- Make sure you are using the latest version of TBomb
+- Don't put spaces in between phone number (Ex- 12345 67890)
+- Make sure you are using the latest version of krishnabomb
 - Make sure you are using Python v3.
 
 Here's how you can check it. Type this command in your terminal.
@@ -18,7 +18,7 @@ If output looks like `Python 3` - Congrats, Python 3 is installed properly.
 
 - Do not use this to harm others.
 - This script is only for educational purposes or to prank.
-- **None of the developers/contributors are responsible for the misuse of TBomb.**
+- **I am not responsible for the misuse of krishnabomb.**
 <br>
 
 ## Features:
@@ -48,7 +48,7 @@ To use the bomber type the following commands in Termux:
 ```
 pkg install git
 pkg install python
-git clone https://github.com/TheSpeedX/TBomb.git
+git clone 
 cd TBomb
 chmod +x TBomb.sh
 ./TBomb.sh
