@@ -2,6 +2,8 @@ import streamlit as st
 from PIL import Image, UnidentifiedImageError
 import os
 import utils
+import auth
+import bcrypt
 import time
 import validators
 import requests
@@ -41,6 +43,7 @@ from langchain_community.callbacks import StreamlitCallbackHandler
 # Application Setup & Theme
 # -------------------------
 st.set_page_config(page_title="Search Markets Chatbot", page_icon="💬", layout="wide")
+auth.init_db()
 
 # Custom CSS for enhanced theme and readability
 # ─────────────────────────────────────────────────────────────────────────────
@@ -147,10 +150,13 @@ page = st.sidebar.radio(
         "SM Data GPT",
         "SM Web GPT",
         "SM Net GPT",
-        "SM Advisory GPT"
+        "SM Advisory GPT",
+        "Client Panel",
+        "Admin Panel"
     ],
     key="NAV_MENU"
 )
+auth.logout_button()
 
 # Sidebar spacing tweak
 st.markdown(
@@ -702,3 +708,64 @@ elif page == "SM Net GPT":
 
     # run it
     MultiSourceChatbot().main()
+
+# -------------------------
+# Page: Client Panel
+# -------------------------
+elif page == "Client Panel":
+    auth.require_login()
+    auth.logout_button()
+    st.header("Client Panel")
+    user = auth.get_user(st.session_state["user"]["id"])
+    st.write(f"Welcome, {user['username']}")
+
+    with st.expander("Edit Profile"):
+        new_email = st.text_input("Email", value=user.get("email", ""))
+        new_pwd = st.text_input("New Password", type="password")
+        if st.button("Save Profile"):
+            fields = {}
+            if new_email != user.get("email"):
+                fields["email"] = new_email
+            if new_pwd:
+                fields["password"] = bcrypt.hashpw(new_pwd.encode(), bcrypt.gensalt()).decode()
+            if fields:
+                auth.update_user(user["id"], **fields)
+                st.success("Profile updated")
+
+    utils.sync_st_session()
+    chain = ConversationChain(llm=llm, verbose=False)
+    q = st.chat_input("Ask the chatbot", key="CLIENT_CHAT")
+    if q:
+        auth.log_message(user["id"], q)
+        utils.display_msg(q, "user")
+        with st.chat_message("assistant"):
+            handler = StreamHandler(st.empty())
+            result = chain.invoke({"input": q}, {"callbacks": [handler]})
+            resp = result["response"]
+            st.session_state['messages'].append({"role": "assistant", "content": resp})
+            utils.print_qa(ConversationChain, q, resp)
+
+# -------------------------
+# Page: Admin Panel
+# -------------------------
+elif page == "Admin Panel":
+    auth.require_login(admin=True)
+    auth.logout_button()
+    st.header("Admin Panel")
+    tab = st.sidebar.radio("Admin Menu", ["Users", "Analytics"], key="ADMIN_MENU")
+    if tab == "Users":
+        search = st.text_input("Search user")
+        users = auth.list_users(search)
+        for uid, uname, email, active, is_admin in users:
+            cols = st.columns([2,2,1,1,1])
+            cols[0].write(uname)
+            cols[1].write(email)
+            cols[2].write("Admin" if is_admin else "User")
+            cols[3].write("Active" if active else "Inactive")
+            action = "Deactivate" if active else "Activate"
+            if cols[4].button(action, key=f"u{uid}"):
+                auth.update_user(uid, is_active=0 if active else 1)
+                st.experimental_rerun()
+    else:
+        st.subheader("Usage Stats")
+        st.write(f"Total messages: {auth.count_logs()}")
