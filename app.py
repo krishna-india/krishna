@@ -127,6 +127,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Require user authentication before showing the app
+auth.require_login()
+
 
 # -------------------------
 # Sidebar: Logo & Navigation
