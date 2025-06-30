@@ -4,13 +4,6 @@ from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any
 
-import utils
-from streaming import StreamHandler
-
-# LangChain imports (sample)
-from langchain.chains import ConversationChain
-from langchain_community.utilities.sql_database import SQLDatabase
-from langchain_community.agent_toolkits import create_sql_agent
 
 app = FastAPI(title="Chatbot API", openapi_url="/openapi.json", docs_url="/docs")
 
@@ -41,6 +34,7 @@ def stream_text(text: str):
 
 @app.post("/chat/basic")
 async def chat_basic(req: ChatRequest):
+
     llm = utils.configure_llm()
     chain = ConversationChain(llm=llm, verbose=False)
     out = chain.invoke({"input": req.message})
@@ -49,6 +43,7 @@ async def chat_basic(req: ChatRequest):
 
 @app.post("/chat/sql")
 async def chat_sql(req: ChatRequest):
+
     llm = utils.configure_llm()
     db = SQLDatabase.from_uri(req.db_uri or "sqlite:///assets/movie.db")
     agent = create_sql_agent(llm=llm, db=db, verbose=False)
@@ -58,6 +53,7 @@ async def chat_sql(req: ChatRequest):
 
 @app.post("/chat/web")
 async def chat_web(req: ChatRequest):
+
     from langchain_community.tools import DuckDuckGoSearchRun
     search = DuckDuckGoSearchRun()
     result = search.run(req.message)
@@ -66,6 +62,7 @@ async def chat_web(req: ChatRequest):
 
 @app.post("/chat/advisory")
 async def chat_advisory(message: str = Form(...), file: UploadFile = File(...)):
+
     from langchain_community.document_loaders import PyPDFLoader
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     from langchain_community.vectorstores import DocArrayInMemorySearch
@@ -92,11 +89,12 @@ async def chat_advisory(message: str = Form(...), file: UploadFile = File(...)):
 @app.post("/chat/multi")
 async def chat_multi(req: ChatRequest):
     # placeholder: combine sql + web search
+
     llm = utils.configure_llm()
     db = SQLDatabase.from_uri(req.db_uri or "sqlite:///assets/movie.db")
     agent = create_sql_agent(llm=llm, db=db, verbose=False)
     sql_out = agent.invoke({"input": req.message})
-    from langchain_community.tools import DuckDuckGoSearchRun
+
     search = DuckDuckGoSearchRun()
     web_out = search.run(req.message)
     chain = ConversationChain(llm=llm, verbose=False)
@@ -110,6 +108,7 @@ async def websocket_chat(ws: WebSocket):
     try:
         while True:
             data = await ws.receive_text()
+
             llm = utils.configure_llm()
             chain = ConversationChain(llm=llm, verbose=False)
             out = chain.invoke({"input": data})
