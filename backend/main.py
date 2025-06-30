@@ -4,9 +4,6 @@ from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any
 
-# import from backend package to avoid ModuleNotFoundError
-# utils will be imported lazily inside routes
-from streaming import StreamHandler
 
 app = FastAPI(title="Chatbot API", openapi_url="/openapi.json", docs_url="/docs")
 
@@ -37,8 +34,7 @@ def stream_text(text: str):
 
 @app.post("/chat/basic")
 async def chat_basic(req: ChatRequest):
-    from backend import utils
-    from langchain.chains import ConversationChain
+
     llm = utils.configure_llm()
     chain = ConversationChain(llm=llm, verbose=False)
     out = chain.invoke({"input": req.message})
@@ -47,9 +43,7 @@ async def chat_basic(req: ChatRequest):
 
 @app.post("/chat/sql")
 async def chat_sql(req: ChatRequest):
-    from backend import utils
-    from langchain_community.utilities.sql_database import SQLDatabase
-    from langchain_community.agent_toolkits import create_sql_agent
+
     llm = utils.configure_llm()
     db = SQLDatabase.from_uri(req.db_uri or "sqlite:///assets/movie.db")
     agent = create_sql_agent(llm=llm, db=db, verbose=False)
@@ -59,7 +53,7 @@ async def chat_sql(req: ChatRequest):
 
 @app.post("/chat/web")
 async def chat_web(req: ChatRequest):
-    from backend import utils
+
     from langchain_community.tools import DuckDuckGoSearchRun
     search = DuckDuckGoSearchRun()
     result = search.run(req.message)
@@ -68,7 +62,7 @@ async def chat_web(req: ChatRequest):
 
 @app.post("/chat/advisory")
 async def chat_advisory(message: str = Form(...), file: UploadFile = File(...)):
-    from backend import utils
+
     from langchain_community.document_loaders import PyPDFLoader
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     from langchain_community.vectorstores import DocArrayInMemorySearch
@@ -95,16 +89,12 @@ async def chat_advisory(message: str = Form(...), file: UploadFile = File(...)):
 @app.post("/chat/multi")
 async def chat_multi(req: ChatRequest):
     # placeholder: combine sql + web search
-    from backend import utils
-    from langchain_community.utilities.sql_database import SQLDatabase
-    from langchain_community.agent_toolkits import create_sql_agent
-    from langchain_community.tools import DuckDuckGoSearchRun
-    from langchain.chains import ConversationChain
 
     llm = utils.configure_llm()
     db = SQLDatabase.from_uri(req.db_uri or "sqlite:///assets/movie.db")
     agent = create_sql_agent(llm=llm, db=db, verbose=False)
     sql_out = agent.invoke({"input": req.message})
+
     search = DuckDuckGoSearchRun()
     web_out = search.run(req.message)
     chain = ConversationChain(llm=llm, verbose=False)
@@ -118,8 +108,7 @@ async def websocket_chat(ws: WebSocket):
     try:
         while True:
             data = await ws.receive_text()
-            from backend import utils
-            from langchain.chains import ConversationChain
+
             llm = utils.configure_llm()
             chain = ConversationChain(llm=llm, verbose=False)
             out = chain.invoke({"input": data})
